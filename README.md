@@ -69,6 +69,7 @@ PORT=3000
 3. Create a new application
 4. Note your Client ID and Client Secret
 5. Add `http://localhost:3000/auth/callback` as a Redirect URI in your app settings
+6. Select 'Web API'
 
 ### 6. Start the Application
 
