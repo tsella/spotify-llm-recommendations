@@ -30,4 +30,4 @@ _one of the files was missing.. with 3.5 it would probably be more than one._
 missing helpers.js please make as separate artifact
 ```
 
-** overall it had one bug which i fixed manually, a second app.listen otherwise worked out of the box. we are living in the future **
+overall it had one bug which i fixed manually, a second app.listen otherwise worked out of the box. we are living in the future
