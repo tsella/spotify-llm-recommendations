@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotify LLM Recommendations</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .hero {
+      background: linear-gradient(135deg, #1DB954, #191414);
+      padding: 5rem 0;
+      border-radius: 10px;
+    }
+    .btn-spotify {
+      background-color: #1DB954;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 30px;
+    }
+    .btn-spotify:hover {
+      background-color: #1ed760;
+      color: white;
+    }
+    .feature-card {
+      background-color: #191414;
+      border-radius: 10px;
+      padding: 1.5rem;
+      height: 100%;
+      border: 1px solid #333;
+    }
+    .feature-icon {
+      font-size: 2.5rem;
+      color: #1DB954;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="hero text-center p-5 mb-5">
+      <h1 class="display-3 fw-bold">Spotify LLM Recommendations</h1>
+      <p class="lead fs-4">Discover new music tailored to your taste with AI-powered recommendations</p>
+      <% if (!isLoggedIn) { %>
+        <a href="/auth/login" class="btn btn-spotify btn-lg mt-3">
+          <i class="bi bi-spotify me-2"></i> Login with Spotify
+        </a>
+      <% } else { %>
+        <a href="/spotify/dashboard" class="btn btn-spotify btn-lg mt-3">Go to Dashboard</a>
+      <% } %>
+    </div>
+
+    <div class="row mb-5">
+      <div class="col-md-4 mb-4">
+        <div class="feature-card text-center">
+          <div class="feature-icon">
+            <i class="bi bi-music-note-list"></i>
+          </div>
+          <h3>Smart Analysis</h3>
+          <p>Our app analyzes your Spotify listening habits to understand your unique music taste</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="feature-card text-center">
+          <div class="feature-icon">
+            <i class="bi bi-robot"></i>
+          </div>
+          <h3>AI-Powered</h3>
+          <p>Advanced language model generates personalized music recommendations just for you</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="feature-card text-center">
+          <div class="feature-icon">
+            <i class="bi bi-hand-thumbs-up"></i>
+          </div>
+          <h3>Feedback System</h3>
+          <p>Like or dislike recommendations to help improve future suggestions</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-5 mb-5">
+      <p>© 2025 Spotify LLM Recommendations | Not affiliated with Spotify</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
