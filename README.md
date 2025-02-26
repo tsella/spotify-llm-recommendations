@@ -20,7 +20,7 @@ A Node.js application that connects to your Spotify account, analyzes your liste
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/spotify-llm-recommendations.git
+git clone https://github.com/tsella/spotify-llm-recommendations.git
 cd spotify-llm-recommendations
 
 # Install dependencies
