@@ -14,7 +14,13 @@ function getSpotifyApi(accessToken) {
   return spotifyApi;
 }
 
-// Get user's top tracks
+/**
+ * Get user's top tracks
+ * @param {string} accessToken - Spotify access token
+ * @param {string} timeRange - Time range (short_term, medium_term, long_term)
+ * @param {number} limit - Number of tracks to retrieve
+ * @returns {Promise<Array>} - Array of track objects
+ */
 async function getTopTracks(accessToken, timeRange = 'medium_term', limit = 50) {
   const spotifyApi = getSpotifyApi(accessToken);
   
@@ -45,7 +51,13 @@ async function getTopTracks(accessToken, timeRange = 'medium_term', limit = 50) 
   }
 }
 
-// Get user's top artists
+/**
+ * Get user's top artists
+ * @param {string} accessToken - Spotify access token
+ * @param {string} timeRange - Time range (short_term, medium_term, long_term)
+ * @param {number} limit - Number of artists to retrieve
+ * @returns {Promise<Array>} - Array of artist objects
+ */
 async function getTopArtists(accessToken, timeRange = 'medium_term', limit = 50) {
   const spotifyApi = getSpotifyApi(accessToken);
   
@@ -69,7 +81,12 @@ async function getTopArtists(accessToken, timeRange = 'medium_term', limit = 50)
   }
 }
 
-// Get recently played tracks
+/**
+ * Get recently played tracks
+ * @param {string} accessToken - Spotify access token
+ * @param {number} limit - Number of tracks to retrieve
+ * @returns {Promise<Array>} - Array of recently played track objects
+ */
 async function getRecentlyPlayed(accessToken, limit = 50) {
   const spotifyApi = getSpotifyApi(accessToken);
   
@@ -97,7 +114,12 @@ async function getRecentlyPlayed(accessToken, limit = 50) {
   }
 }
 
-// Search for and validate recommendations on Spotify
+/**
+ * Search and validate recommendations on Spotify
+ * @param {string} accessToken - Spotify access token
+ * @param {Array} recommendations - Recommendations from LLM
+ * @returns {Promise<Array>} - Array of validated Spotify recommendations
+ */
 async function validateRecommendations(accessToken, recommendations) {
   const spotifyApi = getSpotifyApi(accessToken);
   const validatedRecommendations = [];
@@ -162,9 +184,61 @@ async function validateRecommendations(accessToken, recommendations) {
   return validatedRecommendations;
 }
 
+/**
+ * Get audio features for tracks
+ * @param {string} accessToken - Spotify access token
+ * @param {Array} trackIds - Array of track IDs
+ * @returns {Promise<Array>} - Array of audio features
+ */
+async function getAudioFeatures(accessToken, trackIds) {
+  const spotifyApi = getSpotifyApi(accessToken);
+  
+  try {
+    // Spotify API can only process 100 tracks at a time
+    const chunks = [];
+    for (let i = 0; i < trackIds.length; i += 100) {
+      chunks.push(trackIds.slice(i, i + 100));
+    }
+    
+    let allFeatures = [];
+    
+    for (const chunk of chunks) {
+      const response = await spotifyApi.getAudioFeaturesForTracks(chunk);
+      allFeatures = [...allFeatures, ...response.body.audio_features];
+    }
+    
+    return allFeatures;
+  } catch (error) {
+    console.error('Error fetching audio features:', error);
+    throw error;
+  }
+}
+
+/**
+ * Search for items on Spotify
+ * @param {string} accessToken - Spotify access token
+ * @param {string} query - Search query
+ * @param {Array} types - Array of types to search for (artist, track, album, playlist)
+ * @param {number} limit - Number of results per type
+ * @returns {Promise<Object>} - Search results
+ */
+async function search(accessToken, query, types = ['artist', 'track'], limit = 10) {
+  const spotifyApi = getSpotifyApi(accessToken);
+  
+  try {
+    const response = await spotifyApi.search(query, types, { limit });
+    return response.body;
+  } catch (error) {
+    console.error('Error searching Spotify:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   getTopTracks,
   getTopArtists,
   getRecentlyPlayed,
-  validateRecommendations
+  validateRecommendations,
+  getAudioFeatures,
+  search
 };

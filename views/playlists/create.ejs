@@ -1,0 +1,181 @@
+<%- include('../partials/header', { title: 'Create Playlist' }) %>
+<%- include('../partials/navbar', { active: 'create-playlist', user: user }) %>
+
+<!-- Main Content -->
+<div class="container my-5">
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center">
+          <h1 class="mb-3">Create a Themed Playlist</h1>
+          <p class="lead">
+            Generate a personalized playlist based on a theme, style, or emotion that fits your music taste
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-5">
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="mb-0">Choose a Theme</h5>
+        </div>
+        <div class="card-body">
+          <form id="playlistForm">
+            <div class="mb-3">
+              <label for="theme" class="form-label">Playlist Theme, Style, or Emotion</label>
+              <input type="text" class="form-control" id="theme" name="theme" placeholder="e.g., Rainy Sunday, 80s Nostalgia, Workout Energy, Summer Vibes..." required>
+              <div class="form-text">
+                Be specific about the mood, genre, era, or activity you want music for.
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="trackCount" class="form-label">Number of Tracks</label>
+              <select class="form-select" id="trackCount" name="trackCount">
+                <option value="10">10 tracks</option>
+                <option value="20" selected>20 tracks</option>
+                <option value="30">30 tracks</option>
+                <option value="50">50 tracks</option>
+              </select>
+            </div>
+            
+            <button type="submit" class="btn btn-spotify w-100 mt-3">
+              <i class="bi bi-music-note-list me-2"></i> Create Playlist
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="mb-0">Suggested Themes</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <% suggestedThemes.forEach(theme => { %>
+              <div class="col-md-6">
+                <div class="card theme-card p-3 text-center h-100" onclick="setTheme('<%= theme.name %>')">
+                  <div class="theme-icon">
+                    <% if (theme.name.includes('Chill')) { %>
+                      <i class="bi bi-cloud"></i>
+                    <% } else if (theme.name.includes('Workout')) { %>
+                      <i class="bi bi-lightning"></i>
+                    <% } else if (theme.name.includes('Focus')) { %>
+                      <i class="bi bi-bookmark-star"></i>
+                    <% } else if (theme.name.includes('Happy')) { %>
+                      <i class="bi bi-emoji-smile"></i>
+                    <% } else if (theme.name.includes('Dance')) { %>
+                      <i class="bi bi-music-note-beamed"></i>
+                    <% } else if (theme.name.includes('Nostalgic')) { %>
+                      <i class="bi bi-hourglass-split"></i>
+                    <% } else if (theme.name.includes('Rainy')) { %>
+                      <i class="bi bi-cloud-rain"></i>
+                    <% } else if (theme.name.includes('Acoustic')) { %>
+                      <i class="bi bi-soundwave"></i>
+                    <% } else { %>
+                      <i class="bi bi-music-note"></i>
+                    <% } %>
+                  </div>
+                  <h5><%= theme.name %></h5>
+                  <p class="theme-description mb-0"><%= theme.description %></p>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-success">
+          <i class="bi bi-check-circle me-2"></i> Playlist Created!
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <h4 id="playlistName" class="mb-3"></h4>
+        <p>Your themed playlist has been created with <span id="trackCountResult"></span> tracks.</p>
+        <p class="mb-4">Open it in Spotify to start listening!</p>
+        <a id="playlistLink" href="#" target="_blank" class="btn btn-spotify mb-2">
+          <i class="bi bi-spotify me-2"></i> Open in Spotify
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner-border" role="status"></div>
+  <h4>Creating your playlist...</h4>
+  <p>This may take a moment as our AI crafts the perfect themed playlist for you.</p>
+</div>
+
+<script>
+  // Function to set theme from suggestions
+  function setTheme(theme) {
+    document.getElementById('theme').value = theme;
+    // Scroll to submit button
+    document.getElementById('playlistForm').scrollIntoView({ behavior: 'smooth' });
+  }
+  
+  // Handle form submission
+  document.getElementById('playlistForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
+    // Show loading overlay
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    const theme = document.getElementById('theme').value;
+    const trackCount = document.getElementById('trackCount').value;
+    
+    try {
+      const response = await fetch('/playlists/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ theme, trackCount }),
+      });
+      
+      const data = await response.json();
+      
+      // Hide loading overlay
+      document.getElementById('loadingOverlay').style.display = 'none';
+      
+      if (data.success) {
+        // Update modal with playlist info
+        document.getElementById('playlistName').textContent = data.name;
+        document.getElementById('trackCountResult').textContent = data.trackCount;
+        document.getElementById('playlistLink').href = data.playlistUrl;
+        
+        // Show success modal
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+        
+        // Reset form
+        document.getElementById('playlistForm').reset();
+      } else {
+        alert('Error: ' + (data.error || 'Failed to create playlist'));
+      }
+    } catch (error) {
+      // Hide loading overlay
+      document.getElementById('loadingOverlay').style.display = 'none';
+      alert('Error creating playlist. Please try again.');
+      console.error('Error:', error);
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

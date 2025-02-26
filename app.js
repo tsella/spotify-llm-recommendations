@@ -1,3 +1,4 @@
+// Main application entry point
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -5,9 +6,12 @@ const SQLiteStore = require('connect-sqlite3')(session);
 const path = require('path');
 const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
+
+// Route handlers
 const authRoutes = require('./routes/auth');
 const spotifyRoutes = require('./routes/spotify');
 const recommendationRoutes = require('./routes/recommendations');
+const playlistRoutes = require('./routes/playlists');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -58,6 +62,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use('/auth', authRoutes);
 app.use('/spotify', spotifyRoutes);
 app.use('/recommendations', recommendationRoutes);
+app.use('/playlists', playlistRoutes);
 
 // Home route
 app.get('/', (req, res) => {
@@ -114,31 +119,4 @@ process.on('SIGINT', () => {
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
-});
-
-// View engine setup
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
-// Routes
-app.use('/auth', authRoutes);
-app.use('/spotify', spotifyRoutes);
-app.use('/recommendations', recommendationRoutes);
-
-// Home route
-app.get('/', (req, res) => {
-  res.render('index', { 
-    isLoggedIn: req.session.spotifyAccessToken ? true : false 
-  });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).render('error', { message: 'Page not found' });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).render('error', { message: 'Something went wrong!' });
 });

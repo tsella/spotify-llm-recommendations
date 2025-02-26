@@ -1,5 +1,8 @@
-const axios = require('axios');
+const { createLLMServiceFromEnv } = require('./llm/index');
 const helpers = require('../utils/helpers');
+
+// Create LLM service instance based on environment configuration
+const llmService = createLLMServiceFromEnv();
 
 // Format user music profile for LLM context
 function formatMusicProfile(topTracks, topArtists, recentlyPlayed) {
@@ -34,17 +37,29 @@ function formatFeedback(previousFeedback) {
   return formatted;
 }
 
-// Generate recommendations using Ollama LLM
+// Generate recommendations using configured LLM
 async function getRecommendations(topTracks, topArtists, recentlyPlayed, previousFeedback) {
   try {
     const musicProfile = formatMusicProfile(topTracks, topArtists, recentlyPlayed);
     const feedbackHistory = formatFeedback(previousFeedback);
+    
+    // Analyze user's music diversity
+    const diversity = helpers.calculateDiversity(topArtists, topTracks);
+    
+    // Extract top genres
+    const { topGenres } = helpers.extractGenres(topArtists);
     
     const prompt = `
 You are a music recommendation system. Based on the user's music profile and past feedback, suggest 5 artists and 5 tracks they might enjoy.
 
 User's Music Profile:
 ${musicProfile}
+
+User's Top Genres:
+${topGenres.join(', ')}
+
+User's Music Diversity Score: ${diversity.overall}/100
+(Artist Diversity: ${diversity.artistDiversity}, Genre Diversity: ${diversity.genreDiversity})
 
 User's Previous Feedback on Recommendations:
 ${feedbackHistory}
@@ -71,71 +86,70 @@ Provide recommendations in the following JSON format:
 Important: Make recommendations that match their listening patterns but also introduce some new elements. Be specific with artist and track names. Make sure they exist on Spotify.
     `;
     
-    const response = await axios.post(`${process.env.OLLAMA_BASE_URL}/api/generate`, {
-      model: process.env.OLLAMA_MODEL || 'llama3',
-      prompt: prompt,
-      stream: false,
-      options: {
-        temperature: 0.7
-      },
-      format: 'json'
-    });
-    
-    // Extract the text response
-    const responseText = response.data.response;
-    
-    // Find the JSON object in the response
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const jsonString = jsonMatch[0];
-      const result = JSON.parse(jsonString);
-      return result.recommendations;
-    } else {
-      // Fallback if the response is not properly formatted JSON
-      console.error('LLM response is not valid JSON:', responseText);
+    try {
+      // Generate completion from LLM
+      const responseText = await llmService.generateCompletion(prompt);
       
-      // Create some basic default recommendations to prevent complete failure
-      return [
-        {
-          id: 'default_1',
-          type: 'artist',
-          name: 'Radiohead',
-          reason: 'Based on your music profile, you might enjoy this artist'
-        },
-        {
-          id: 'default_2',
-          type: 'track',
-          name: 'Bohemian Rhapsody',
-          artist: 'Queen',
-          reason: 'A timeless classic that matches your listening patterns'
-        }
-      ];
+      // Parse the response
+      const result = llmService.parseResponse(responseText);
+      
+      if (result && result.recommendations) {
+        // Process recommendations to ensure they have IDs
+        return helpers.processRecommendations(result.recommendations);
+      }
+      
+      throw new Error('Invalid response format from LLM');
+    } catch (error) {
+      console.error('Error with LLM service:', error);
+      
+      // Return fallback recommendations
+      return getFallbackRecommendations(topGenres);
     }
   } catch (error) {
-    console.error('Error generating recommendations with Ollama:', error);
-    
-    // Return a basic fallback if the API call fails
-    return [
-      {
-        id: 'fallback_1',
-        type: 'artist',
-        name: 'The Beatles',
-        reason: 'A universally acclaimed artist that many music lovers enjoy'
-      },
-      {
-        id: 'fallback_2',
-        type: 'track',
-        name: 'Hotel California',
-        artist: 'Eagles',
-        reason: 'One of the most popular songs of all time'
-      }
-    ];
+    console.error('Error generating recommendations:', error);
+    throw error;
   }
 }
 
-module.exports = {
-  getRecommendations
-};
+// Provide fallback recommendations if LLM fails
+function getFallbackRecommendations(topGenres = []) {
+  const fallbacks = [
+    {
+      id: 'fallback_1',
+      type: 'artist',
+      name: 'The Beatles',
+      reason: 'A universally acclaimed artist that many music lovers enjoy'
+    },
+    {
+      id: 'fallback_2',
+      type: 'track',
+      name: 'Hotel California',
+      artist: 'Eagles',
+      reason: 'One of the most popular songs of all time'
+    },
+    {
+      id: 'fallback_3',
+      type: 'artist',
+      name: 'Queen',
+      reason: 'Legendary band with wide appeal and diverse musical styles'
+    },
+    {
+      id: 'fallback_4',
+      type: 'track',
+      name: 'Bohemian Rhapsody',
+      artist: 'Queen',
+      reason: 'A timeless classic with multiple musical elements'
+    },
+    {
+      id: 'fallback_5',
+      type: 'artist',
+      name: 'Daft Punk',
+      reason: 'Influential electronic music that crosses many genres'
+    }
+  ];
+  
+  return fallbacks;
+}
 
 module.exports = {
   getRecommendations

@@ -1,0 +1,56 @@
+<%- include('../partials/header', { title: 'My Playlists' }) %>
+<%- include('../partials/navbar', { active: 'my-playlists', user: user }) %>
+
+<!-- Main Content -->
+<div class="container my-5">
+  <div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h1>Your Playlists</h1>
+      <a href="/playlists/create" class="btn btn-spotify">
+        <i class="bi bi-plus-circle me-2"></i> Create New Playlist
+      </a>
+    </div>
+  </div>
+
+  <% if (playlists.length === 0) { %>
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle me-2"></i>
+      You don't have any playlists yet. Create your first themed playlist!
+    </div>
+  <% } else { %>
+    <div class="row">
+      <% playlists.forEach(playlist => { %>
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+          <div class="card playlist-card h-100">
+            <div class="card-body">
+              <% if (playlist.images && playlist.images.length > 0) { %>
+                <img src="<%= playlist.images[0].url %>" alt="<%= playlist.name %>" class="playlist-img mb-3">
+              <% } else { %>
+                <div class="playlist-img mb-3 bg-secondary d-flex align-items-center justify-content-center">
+                  <i class="bi bi-music-note-list fs-1"></i>
+                </div>
+              <% } %>
+              
+              <h5 class="card-title"><%= playlist.name %></h5>
+              
+              <% if (playlist.description) { %>
+                <p class="playlist-description mb-2"><%= playlist.description %></p>
+              <% } %>
+              
+              <p class="playlist-track-count mb-3">
+                <i class="bi bi-music-note me-1"></i>
+                <%= playlist.tracks.total %> tracks
+              </p>
+              
+              <a href="<%= playlist.external_urls.spotify %>" target="_blank" class="btn btn-spotify btn-sm w-100">
+                <i class="bi bi-spotify me-2"></i> Open in Spotify
+              </a>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

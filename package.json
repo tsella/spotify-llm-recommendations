@@ -1,7 +1,7 @@
 {
   "name": "spotify-llm-recommendations",
-  "version": "1.0.0",
-  "description": "A Node.js app that uses Spotify data and an LLM to recommend new music",
+  "version": "1.1.0",
+  "description": "A Node.js app that uses Spotify data and LLMs to recommend new music",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -19,6 +19,18 @@
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
-  }
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [
+    "spotify",
+    "recommendations",
+    "llm",
+    "ollama",
+    "music"
+  ],
+  "author": "Tom Sella @tsella",
+  "license": "MIT"
 }

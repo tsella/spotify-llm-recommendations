@@ -188,7 +188,7 @@ const helpers = {
   /**
    * Process LLM-generated recommendations to ensure they have unique IDs
    * @param {Array} recommendations - Recommendations from LLM
-   * @returns {Array} Processed recommendations with IDs
+   * @returns {Array} - Processed recommendations with IDs
    */
   processRecommendations(recommendations) {
     if (!recommendations || !Array.isArray(recommendations)) {

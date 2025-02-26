@@ -5,7 +5,12 @@ class Feedback {
     // We'll use the db from app.locals in the routes
   }
 
-  // Create a new feedback entry
+  /**
+   * Create a new feedback entry
+   * @param {Object} db - SQLite database instance
+   * @param {Object} feedbackData - Feedback data to save
+   * @returns {Promise<number>} - ID of the created feedback
+   */
   create(db, feedbackData) {
     return new Promise((resolve, reject) => {
       const sql = `
@@ -37,7 +42,13 @@ class Feedback {
     });
   }
 
-  // Find feedback entries for a user
+  /**
+   * Find feedback entries for a user
+   * @param {Object} db - SQLite database instance
+   * @param {Object} conditions - Query conditions
+   * @param {Object} options - Query options
+   * @returns {Promise<Array>} - Array of feedback objects
+   */
   find(db, conditions, options = {}) {
     return new Promise((resolve, reject) => {
       const { userId } = conditions;
